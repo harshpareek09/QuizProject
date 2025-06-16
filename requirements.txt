@@ -1,0 +1,5 @@
+# Ye file batati hai ki backend ke liye kaun kaun se Python libraries install karni hain.
+
+flask
+mysql-connector-python
+reportlab

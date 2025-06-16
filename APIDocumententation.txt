@@ -1,0 +1,79 @@
+1. /teacher/login
+🔎 Kyu: Teacher verify ho real user hai ya nahi
+🧠 Kaha: teacher_login.html form submit ke baad
+Use: Session/login identity maintain karne ke liye — successful login ke baad unka teacher_id aur teacher_name store hoga browser me
+
+2. /teacher/create-quiz
+🔎 Kyu: Ek naye quiz ka record banana database me
+🧠 Kaha: create_quiz.html page se jab teacher title enter kare
+Use: Quiz create hone ke baad use ki quiz_id se question add karte hain
+
+3. /teacher/add-question
+🔎 Kyu: Har quiz ke multiple questions honge
+🧠 Kaha: add_question.html jab question + options form submit ho
+Use: Har question ek record banega questions table me — quiz ke ID se linked
+
+4. /teacher/delete-quiz/<quiz_id>
+🔎 Kyu: Agar teacher galti se quiz banaye, ya purana quiz delete karna ho
+🧠 Kaha: dashboard_teacher.html ke har quiz card ke Delete button pe
+Use: Ye API quiz ko DB se hata deti hai, plus uske saare questions/responses/violations bhi (cascade delete)
+
+5. /teacher/quizzes/<teacher_id>
+🔎 Kyu: Ek teacher ne jitne quiz banaye — unka list chahiye
+🧠 Kaha:
+
+dashboard_teacher.html — quiz cards display karne ke liye
+
+all_quiz_results.html — result summary card banane ke liye
+Use: Ye API UI ko fill karne me help karti hai — frontend ko pata hota hai kaunse quizzes render karne hai
+
+6. /teacher/results/<quiz_id>
+🔎 Kyu: Ek quiz me kis student ne kya score kiya + cheating kiya ya nahi
+🧠 Kaha: quiz_results_detail.html — har student ka result dikhane ke liye
+Use: Teacher ko full visibility milti hai kisne cheat kiya, kisne nahi
+
+7. /teacher/export/<quiz_id>
+🔎 Kyu: Result PDF download chahiye — documentation/record ke liye
+🧠 Kaha: quiz_results_detail.html page ka "Download PDF" button
+Use: PDF file generate hoti hai server side se using ReportLab and is downloaded directly
+
+8. /teacher/delete-question/<question_id>
+🔎 Kyu: Agar koi question galti se daal diya ho
+🧠 Kaha: add_question.html me question list ke Delete button pe
+Use: Remove karta hai specific question ko DB se — use question_id se target kiya jata hai
+
+9. /teacher/update-question/<question_id>
+🔎 Kyu: Agar question ke options galat ho gaye ho ya edit karna ho
+🧠 Kaha: add_question.html me Edit button → pre-fill form → update via this API
+Use: Same question_id ke record me update hota hai data
+
+👨‍🎓 STUDENT-SIDE APIs
+10. /student/login
+🔎 Kyu: Student ke credentials verify karne ke liye
+🧠 Kaha: student_login.html form submit ke baad
+Use: Student ka email, name, course verify karte ho jo pehle se database me inserted hai
+
+11. /student/quiz/<quiz_id>
+🔎 Kyu: Quiz dene se pehle questions load karne ke liye
+🧠 Kaha: attempt_quiz.html jab page load ho
+Use: Frontend is API se saare questions fetch karta hai aur 1-by-1 show karta hai
+
+12. /student/submit-response
+🔎 Kyu: Har question ka answer store karna hai
+🧠 Kaha: attempt_quiz.html me jab student ek answer select karta hai
+Use: Ye API record banata hai student ke answer ka — question wise
+
+13. /student/final-submit
+🔎 Kyu: Quiz submit hone ke baad result generate karna
+🧠 Kaha: attempt_quiz.html jab submit button pe click hota hai
+Use: Total score, cheating status, reason sab finalize karke result table me store hota hai
+
+14. /student/violation
+🔎 Kyu: Cheating detect hone par uska log banayein
+🧠 Kaha: attempt_quiz.html JS me (tab switch, copy, blur event)
+Use: Auto-submit aur zero marks ka base yehi dete hai
+
+15. /student/result/<quiz_id>/<student_email>
+🔎 Kyu: Student ko apna result dekhna hai
+🧠 Kaha: result.html jab quiz complete ho
+Use: Score, cheating status, reason sab display hota hai

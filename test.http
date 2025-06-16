@@ -1,0 +1,107 @@
+### Student Login Test
+POST http://127.0.0.1:5000/student/login
+Content-Type: application/json
+
+{
+  "email": "test@gmail.com",
+  "full_name": "Test User",
+  "course": "BCA"
+}
+
+###  Teacher Login API Test (No Email)
+POST http://127.0.0.1:5000/teacher/login
+Content-Type: application/json
+
+{
+  "teacher_id": "T101",
+  "full_name": "Ravi Kumar",
+  "password": "1234"
+}
+
+
+
+###  Add Question to Quiz
+POST http://127.0.0.1:5000/teacher/add-question
+Content-Type: application/json
+
+{
+  "quiz_id": 1,
+  "question_text": "What is Python?",
+  "option1": "A snake",
+  "option2": "A programming language",
+  "option3": "A game",
+  "option4": "A car",
+  "correct_option": 2
+}
+
+
+###  Get Quiz Questions as Student
+GET http://127.0.0.1:5000/student/quiz/1
+
+
+###  Submit Student Response
+POST http://127.0.0.1:5000/student/submit-response
+Content-Type: application/json
+
+{
+  "student_email": "test@gmail.com",
+  "quiz_id": 1,
+  "question_id": 1,
+  "selected_option": 2
+}
+
+###  Record Violation (Tab Switch)
+POST http://127.0.0.1:5000/student/violation
+Content-Type: application/json
+
+{
+  "student_email": "test@gmail.com",
+  "quiz_id": 1,
+  "reason": "Tab switch detected"
+}
+
+###  Final Submit and Result Calculation
+POST http://127.0.0.1:5000/student/final-submit
+Content-Type: application/json
+
+{
+  "student_email": "test@gmail.com",
+  "quiz_id": 1
+}
+
+###  Get Student Result
+GET http://127.0.0.1:5000/student/result/1/test@gmail.com
+
+
+
+### Get All Results for a Quiz (Teacher View)
+GET http://127.0.0.1:5000/teacher/results/1
+
+###  Get all quizzes by teacher
+GET http://127.0.0.1:5000/teacher/quizzes/T001
+
+###  Preview all questions in a quiz
+GET http://127.0.0.1:5000/teacher/questions/1
+
+### Export result as PDF
+GET http://127.0.0.1:5000/teacher/export/1
+
+
+###  DELETE a quiz
+DELETE http://localhost:5000/teacher/delete-quiz/1
+
+### DELETE Question
+DELETE http://localhost:5000/teacher/delete-question/5
+
+### UPDATE Question
+PUT http://localhost:5000/teacher/update-question/5
+Content-Type: application/json
+
+{
+  "question_text": "Updated Question?",
+  "option1": "A",
+  "option2": "B",
+  "option3": "C",
+  "option4": "D",
+  "correct_option": 2
+}
