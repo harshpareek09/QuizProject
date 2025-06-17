@@ -1,6 +1,5 @@
 # routes/teacher_routes.py
-
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session  # 🔥 session added here
 import mysql.connector
 from db_config import get_db_connection
 
@@ -36,7 +35,11 @@ def teacher_login():
 
         # Step 6: Return appropriate response
         if teacher:
-            return jsonify({'success': True, 'message': 'Login successful', 'teacher': teacher}), 200
+            # ✅ Store teacher info in session
+            session['teacher_id'] = teacher['teacher_id']
+            session['teacher_name'] = teacher['full_name']
+            
+            return jsonify({'success': True, 'message': 'Login successful'}), 200
         else:
             return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
 
@@ -330,3 +333,34 @@ def update_question(question_id):
 
     except Exception as e:
         return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500
+
+
+
+# For Dashboard List of Quizzes
+from flask import jsonify
+from db_config import get_db_connection  # already imported
+
+@teacher_bp.route('/quizzes/<teacher_id>', methods=['GET'])
+def get_quizzes_by_teacher(teacher_id):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        #  Fetch all quizzes created by this teacher
+        query = "SELECT * FROM quizzes WHERE teacher_id = %s"
+        cursor.execute(query, (teacher_id,))
+        quizzes = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        return jsonify({
+            "success": True,
+            "quizzes": quizzes
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
