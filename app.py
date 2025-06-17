@@ -48,6 +48,17 @@ def teacher_dashboard():
     # If logged in, render dashboard with teacher's name
     return render_template('dashboard.html', teacher_name=session['teacher_name'])
 
+# Edit Question Route
+@app.route('/edit-quiz/<int:quiz_id>')
+def edit_quiz_ui(quiz_id):
+    # Redirect if not logged in
+    if 'teacher_id' not in session:
+        return redirect('/teacher-login')
+    
+    # Load the edit_questions.html and pass quiz_id
+    return render_template("edit_questions.html", quiz_id=quiz_id)
+
+
 
 #  Start Flask server
 if __name__ == '__main__':

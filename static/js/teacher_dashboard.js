@@ -30,10 +30,10 @@ async function loadQuizzes() {
       // Edit button
       clone.querySelector(".edit-btn").addEventListener("click", () => {
         alert(`Edit Quiz ID: ${quiz.quiz_id}`);
-        // You can redirect to: window.location.href = `/edit-quiz/${quiz.quiz_id}`;
+        window.location.href = `/edit-quiz/${quiz.quiz_id}`;
       });
 
-      // ✅ DELETE API + reload
+      // DELETE API + reload
       clone.querySelector(".delete-btn").addEventListener("click", async () => {
         const confirmDelete = confirm(
           `Are you sure you want to delete Quiz ID: ${quiz.quiz_id}?`
@@ -47,14 +47,14 @@ async function loadQuizzes() {
 
           const result = await res.json();
           if (result.success) {
-            alert("✅ Quiz deleted successfully!");
-            loadQuizzes(); // 🔄 Refresh cards
+            alert("Quiz deleted successfully!");
+            loadQuizzes(); // Refresh cards
           } else {
-            alert("❌ Failed to delete: " + result.message);
+            alert("Failed to delete: " + result.message);
           }
         } catch (err) {
           console.error("Error deleting:", err);
-          alert("❌ Server error while deleting quiz.");
+          alert("Server error while deleting quiz.");
         }
       });
 
