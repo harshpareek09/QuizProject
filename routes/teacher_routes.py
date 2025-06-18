@@ -88,31 +88,33 @@ def add_question():
         return jsonify({'success': False, 'message': f'Database error: {err}'}), 500
 
 
-# ✅ Get all results for a specific quiz
+
+# To fetch results of students those give specific quiz
 @teacher_bp.route('/results/<int:quiz_id>', methods=['GET'])
 def get_quiz_results(quiz_id):
     try:
-        # Step 1: Connect to DB
+        # Connect to DB
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        # Step 2: Get quiz title
+        # Get quiz title
         cursor.execute("SELECT title FROM quizzes WHERE quiz_id = %s", (quiz_id,))
         quiz = cursor.fetchone()
         quiz_title = quiz['title'] if quiz else "Unknown Quiz"
 
-        # Step 3: Fetch all results for this quiz
+        # Join with students table for full details
         cursor.execute("""
-            SELECT student_email, total_score, cheating_detected, reason
-            FROM final_results
-            WHERE quiz_id = %s
+            SELECT s.full_name, s.course, f.student_email, f.total_score,
+            f.cheating_detected, f.reason
+            FROM final_results f
+            JOIN students s ON f.student_email = s.email
+            WHERE f.quiz_id = %s
         """, (quiz_id,))
         results = cursor.fetchall()
 
         cursor.close()
         conn.close()
 
-        # Step 4: Return results list
         return jsonify({
             'success': True,
             'quiz_id': quiz_id,
@@ -122,6 +124,7 @@ def get_quiz_results(quiz_id):
 
     except Exception as e:
         return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500
+
 
 
 # 📍 Get all quizzes created by a teacher
@@ -176,41 +179,43 @@ def get_quiz_questions(quiz_id):
         return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500
 
 
-
-from flask import make_response
+# Results export API
+from flask import make_response, jsonify
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+from reportlab.lib import colors
 import io
 
-# 📄 Export final results of a quiz as PDF
 @teacher_bp.route('/export/<int:quiz_id>', methods=['GET'])
 def export_results_pdf(quiz_id):
     try:
-        # Step 1: Connect to database
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # Step 2: Get student result + name + course using JOIN
-        query = """
+        # ✅ Get quiz title
+        cursor.execute("SELECT title FROM quizzes WHERE quiz_id = %s", (quiz_id,))
+        quiz_row = cursor.fetchone()
+        quiz_title = quiz_row[0] if quiz_row else "quiz"
+
+        # ✅ Fetch results with student details
+        cursor.execute("""
             SELECT s.full_name, s.email, s.course,
                    f.total_score, f.cheating_detected, f.reason
             FROM final_results f
             JOIN students s ON f.student_email = s.email
             WHERE f.quiz_id = %s
-        """
-        cursor.execute(query, (quiz_id,))
+        """, (quiz_id,))
         results = cursor.fetchall()
 
-        # Step 3: Setup PDF buffer
-        pdf_buffer = io.BytesIO()
-        pdf = canvas.Canvas(pdf_buffer, pagesize=letter)
+        # ✅ Prepare PDF
+        buffer = io.BytesIO()
+        pdf = canvas.Canvas(buffer, pagesize=letter)
         pdf.setFont("Helvetica", 12)
 
-        # Step 4: Title
-        pdf.drawString(50, 750, f"Quiz Results for Quiz ID: {quiz_id}")
+        # ✅ Add title
+        pdf.drawString(50, 750, f"Quiz Results: {quiz_title}")
         y = 720
 
-        # Step 5: Add table rows
         for i, row in enumerate(results):
             full_name, email, course, score, cheated, reason = row
             line = f"{i+1}. {full_name} | {email} | {course} | Score: {score} | Cheated: {cheated} | Reason: {reason}"
@@ -221,12 +226,15 @@ def export_results_pdf(quiz_id):
                 y = 750
 
         pdf.save()
-        pdf_buffer.seek(0)
+        buffer.seek(0)
 
-        # Step 6: Return PDF as download
-        response = make_response(pdf_buffer.read())
+        # ✅ Sanitize filename (remove spaces/specials)
+        clean_title = quiz_title.lower().replace(" ", "_").replace("'", "").replace('"', "")
+
+        # ✅ Create download response
+        response = make_response(buffer.read())
         response.headers['Content-Type'] = 'application/pdf'
-        response.headers['Content-Disposition'] = f'attachment; filename=quiz_{quiz_id}_results.pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename={clean_title}_results.pdf'
         return response
 
     except Exception as e:
@@ -364,3 +372,45 @@ def get_quizzes_by_teacher(teacher_id):
             "success": False,
             "message": str(e)
         }), 500
+
+
+#API that inserts a new quiz with the teacher’s ID and title, and returns the generated quiz ID
+@teacher_bp.route('/create-quiz', methods=['POST'])
+def create_quiz():
+    data = request.get_json()
+    title = data.get('title')
+    teacher_id = session.get('teacher_id')  # ✅ from session
+
+    if not title or not teacher_id:
+        return jsonify({'success': False, 'message': 'Missing title or session expired'}), 400
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Insert quiz into database
+        insert_query = "INSERT INTO quizzes (title, teacher_id, created_at) VALUES (%s, %s, NOW())"
+        cursor.execute(insert_query, (title, teacher_id))
+        conn.commit()
+
+        # Get the newly inserted quiz ID
+        quiz_id = cursor.lastrowid
+
+        cursor.close()
+        conn.close()
+
+        return jsonify({'success': True, 'quiz_id': quiz_id}), 201
+
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500
+
+
+# Logout Route (inside teacher_bp)
+# Inside teacher_routes.py
+from flask import session, redirect
+
+@teacher_bp.route('/logout')
+def teacher_logout():
+    session.clear()
+    return redirect('/teacher-login')
+

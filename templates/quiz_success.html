@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz Created</title>
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4b0f68;
+      --light-bg: #f4f0f8;
+      --card: #fff;
+      --highlight: #b87de2;
+      --shadow: rgba(0, 0, 0, 0.1);
+    }
+
+    body {
+      font-family: 'Raleway', sans-serif;
+      background: linear-gradient(135deg, #f4f0f8, #e6d7ee);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      padding: 40px;
+      border-radius: 18px;
+      box-shadow: 0 10px 30px var(--shadow);
+      text-align: center;
+      max-width: 500px;
+      animation: fadeSlide 0.7s ease;
+    }
+
+    .card h1 {
+      font-size: 28px;
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+
+    .card p {
+      font-size: 16px;
+      color: #444;
+      margin-bottom: 25px;
+    }
+
+    .link-box {
+      background-color: #f5ebfc;
+      border: 2px dashed var(--highlight);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 15px;
+      font-weight: bold;
+      margin-bottom: 16px;
+      user-select: all;
+      color: var(--primary);
+      word-break: break-all;
+    }
+
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .btn {
+      padding: 12px 20px;
+      font-size: 14px;
+      border: none;
+      border-radius: 50px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .copy-btn {
+      background: var(--primary);
+      color: white;
+    }
+
+    .copy-btn:hover {
+      background: #370c4e;
+    }
+
+    .dashboard-btn {
+      background: #e0c7f5;
+      color: var(--primary);
+    }
+
+    .dashboard-btn:hover {
+      background: #d3b0f1;
+    }
+
+    @keyframes fadeSlide {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #4b0f68;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 30px;
+      opacity: 0;
+      transition: 0.5s;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>🎉 Quiz Created Successfully!</h1>
+    <p>Share this link with your students:</p>
+
+    <div class="link-box" id="quizLink">
+      {{ request.host_url }}student/attempt-quiz/{{ quiz_id }}
+    </div>
+
+    <div class="buttons">
+      <button class="btn copy-btn" onclick="copyLink()">📋 Copy Link</button>
+      <button class="btn dashboard-btn" onclick="window.location.href='/teacher-dashboard'">🏠 Go to Dashboard</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">Link copied to clipboard!</div>
+
+  <script>
+    function copyLink() {
+      const link = document.getElementById("quizLink").innerText;
+      navigator.clipboard.writeText(link).then(() => {
+        const toast = document.getElementById("toast");
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 2000);
+      });
+    }
+  </script>
+
+</body>
+</html>

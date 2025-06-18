@@ -1,3 +1,4 @@
+<!-- templates/edit_questions.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Edit Quiz</title>
   <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@600&family=Inter:wght@500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
     :root {
       --primary: #4b0f68;
@@ -15,32 +16,23 @@
       --shadow: rgba(0, 0, 0, 0.1);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
     body {
       font-family: 'Inter', sans-serif;
       background: var(--background);
+      padding-bottom: 80px;
       color: var(--text);
-      padding-bottom: 60px;
     }
 
     header {
-      position: sticky;
-      top: 0;
       background: var(--primary);
       color: white;
-      padding: 16px 40px;
+      padding: 18px 40px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-family: 'Raleway', sans-serif;
       font-size: 20px;
-      z-index: 999;
-      box-shadow: 0 2px 8px var(--shadow);
+      font-family: 'Raleway', sans-serif;
+      box-shadow: 0 4px 12px var(--shadow);
     }
 
     .back-btn {
@@ -48,42 +40,36 @@
       color: var(--primary);
       padding: 8px 16px;
       border-radius: 30px;
-      border: none;
       font-weight: bold;
       cursor: pointer;
+      border: none;
       transition: 0.3s ease;
     }
 
     .back-btn:hover {
-      background-color: #e8dff1;
+      background-color: #e0d0f0;
     }
 
     .container {
       padding: 40px;
-      display: flex;
-      flex-direction: column;
-      gap: 30px;
       max-width: 1000px;
       margin: auto;
     }
 
     .card {
-      background-color: var(--card);
-      border-radius: 16px;
+      background: var(--card);
       padding: 24px;
+      border-radius: 16px;
       box-shadow: 0 4px 12px var(--shadow);
-      transition: transform 0.2s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-4px);
+      margin-bottom: 30px;
+      animation: slideUp 0.4s ease forwards;
+      opacity: 0;
     }
 
     .card h3 {
-      font-family: 'Raleway', sans-serif;
+      color: var(--primary);
       font-size: 18px;
       margin-bottom: 16px;
-      color: var(--primary);
     }
 
     .form-group {
@@ -91,79 +77,73 @@
     }
 
     .form-group label {
-      display: block;
       font-weight: 600;
       margin-bottom: 6px;
-      font-size: 14px;
+      display: block;
     }
 
     .form-group input, .form-group select {
       width: 100%;
       padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
       font-size: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
     }
 
     .button-group {
       display: flex;
-      justify-content: flex-end;
       gap: 10px;
+      justify-content: flex-end;
       margin-top: 10px;
     }
 
     .btn {
-      padding: 8px 14px;
+      padding: 10px 18px;
       font-size: 14px;
+      font-weight: bold;
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      font-weight: bold;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       transition: background-color 0.3s ease;
     }
 
-    .btn.save {
-      background-color: #28a745;
+    .btn.save { background-color: #28a745; color: white; }
+    .btn.save:hover { background-color: #218838; }
+
+    .btn.delete { background-color: #dc3545; color: white; }
+    .btn.delete:hover { background-color: #c82333; }
+
+    .btn.add-new {
+      background-color: var(--primary);
       color: white;
+      margin-top: 10px;
     }
 
-    .btn.save:hover {
-      background-color: #218838;
-    }
-
-    .btn.delete {
-      background-color: #dc3545;
-      color: white;
-    }
-
-    .btn.delete:hover {
-      background-color: #c82333;
-    }
-
-    .add-new {
-      background-color: #4b0f68;
-      color: white;
-      margin-top: 20px;
-    }
-
-    .add-new:hover {
+    .btn.add-new:hover {
       background-color: #370c4e;
     }
 
-    @media (max-width: 768px) {
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-      }
+    .btn.finish {
+      background-color: #007bff;
+      color: white;
+      display: block;
+      margin: 0 auto;
+      margin-top: 40px;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 30px;
+    }
 
-      .button-group {
-        flex-direction: column;
-        align-items: flex-start;
-      }
+    .btn.finish:hover {
+      background-color: #0056b3;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
@@ -182,11 +162,21 @@
     <button class="btn add-new" onclick="addNewQuestionForm()">
       <i class="fas fa-plus-circle"></i> Add New Question
     </button>
+
+    <!-- ✅ Finish Quiz Button -->
+    <button class="btn finish" onclick="finalizeQuiz()">
+      <i class="fas fa-check-circle"></i> Finish Quiz
+    </button>
   </div>
 
   <script>
-  const quizId = "{{ quiz_id }}";
-</script>
+    const quizId = "{{ quiz_id }}";
+
+    // 👉 Redirect to success page
+    function finalizeQuiz() {
+      window.location.href = `/quiz-success/${quizId}`;
+    }
+  </script>
 
   <script src="/static/js/edit_questions.js"></script>
 

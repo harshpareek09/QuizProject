@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Create New Quiz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4b0f68;
+      --bg: #f4f0f8;
+      --white: #ffffff;
+      --text: #2c2c2c;
+    }
+
+    body {
+      font-family: 'Raleway', sans-serif;
+      background: linear-gradient(135deg, #f4f0f8, #e6d7ee);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .card {
+      background: var(--white);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 400px;
+    }
+
+    h2 {
+      color: var(--primary);
+      margin-bottom: 30px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 20px;
+    }
+
+    button {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:disabled {
+      background-color: #7a3e99;
+      cursor: not-allowed;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: #370c4e;
+    }
+
+    .message {
+      margin-top: 20px;
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Create New Quiz</h2>
+    <input type="text" id="quizTitle" maxlength="100" placeholder="Enter Quiz Title" />
+    <button id="createBtn" onclick="submitQuiz()">Create Quiz</button>
+    <div class="message" id="message"></div>
+  </div>
+
+  <script>
+    async function submitQuiz() {
+      const title = document.getElementById("quizTitle").value.trim();
+      const message = document.getElementById("message");
+      const btn = document.getElementById("createBtn");
+
+      if (!title) {
+        message.textContent = "Quiz title is required.";
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Creating...";
+
+      try {
+        const res = await fetch('/teacher/create-quiz', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          window.location.href = `/edit-quiz/${data.quiz_id}`;
+        } else {
+          message.textContent = data.message || "Failed to create quiz.";
+        }
+      } catch (err) {
+        console.error(err);
+        message.textContent = "Server error.";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Create Quiz";
+      }
+    }
+  </script>
+
+</body>
+</html>

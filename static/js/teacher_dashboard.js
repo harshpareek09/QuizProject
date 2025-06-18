@@ -29,7 +29,6 @@ async function loadQuizzes() {
 
       // Edit button
       clone.querySelector(".edit-btn").addEventListener("click", () => {
-        alert(`Edit Quiz ID: ${quiz.quiz_id}`);
         window.location.href = `/edit-quiz/${quiz.quiz_id}`;
       });
 
@@ -60,8 +59,7 @@ async function loadQuizzes() {
 
       // View Result
       clone.querySelector(".result-btn").addEventListener("click", () => {
-        alert(`View Result for Quiz ID: ${quiz.quiz_id}`);
-        // You can redirect to: window.location.href = `/results/${quiz.quiz_id}`;
+        window.location.href = `/view-result/${quiz.quiz_id}`;
       });
 
       container.appendChild(clone);
