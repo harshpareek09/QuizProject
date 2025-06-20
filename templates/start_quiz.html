@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Attempt Quiz</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #1e1e2f;
+      --card: #2b1d42;
+      --box: #3a2a55;
+      --accent: #a044ff;
+      --accent-alt: #6a00ff;
+      --text: #ffffff;
+      --subtext: #ccc;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    .quiz-container {
+      background-color: var(--card);
+      border-radius: 18px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+      max-width: 850px;
+      width: 100%;
+      padding: 40px;
+      animation: fadeIn 0.6s ease;
+      position: relative;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 30px;
+    }
+
+    .question-box {
+      margin-bottom: 30px;
+      padding: 20px;
+      background-color: var(--box);
+      border-radius: 12px;
+    }
+
+    .question-box h4 {
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+
+    .option {
+      margin-bottom: 12px;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+    }
+
+    .option input[type="radio"] {
+      margin-right: 10px;
+      transform: scale(1.2);
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(to right, var(--accent), var(--accent-alt));
+      border: none;
+      border-radius: 30px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      margin-top: 20px;
+    }
+
+    .submit-btn:hover {
+      background: linear-gradient(to right, var(--accent-alt), var(--accent));
+    }
+
+    #loader {
+      text-align: center;
+      font-size: 16px;
+      margin-bottom: 20px;
+      color: var(--subtext);
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <h2>Quiz in Progress</h2>
+    <div id="questionArea">
+      <div id="loader">⏳ Loading questions...</div>
+    </div>
+    <button class="submit-btn" id="submitQuizBtn">Submit Quiz</button>
+  </div>
+
+  <script>
+    const quiz_id = {{ quiz_id | tojson }};
+    const student_email = new URLSearchParams(window.location.search).get("email");
+  </script>
+  <script src="/static/js/start_quiz.js"></script>
+</body>
+</html>

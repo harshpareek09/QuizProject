@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Launching...</title>
+  <link rel="stylesheet" href="/static/css/responsive.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #0f0f1a;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .cube {
+      width: 80px;
+      height: 80px;
+      transform-style: preserve-3d;
+      animation: rotate 2.5s linear infinite;
+    }
+
+    .cube div {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      border: 2px solid #a044ff;
+      box-shadow: 0 0 15px #a044ff;
+      background: transparent;
+    }
+
+    .cube .front  { transform: translateZ(40px); }
+    .cube .back   { transform: rotateY(180deg) translateZ(40px); }
+    .cube .right  { transform: rotateY(90deg) translateZ(40px); }
+    .cube .left   { transform: rotateY(-90deg) translateZ(40px); }
+    .cube .top    { transform: rotateX(90deg) translateZ(40px); }
+    .cube .bottom { transform: rotateX(-90deg) translateZ(40px); }
+
+    @keyframes rotate {
+      from { transform: rotateX(0deg) rotateY(0deg); }
+      to { transform: rotateX(360deg) rotateY(360deg); }
+    }
+
+    h2 {
+      margin-top: 40px;
+      color: white;
+      font-weight: 400;
+      font-size: 20px;
+      letter-spacing: 1px;
+    }
+
+    @media (max-width: 768px) {
+      .cube {
+        width: 60px;
+        height: 60px;
+      }
+      .cube div {
+        width: 60px;
+        height: 60px;
+      }
+      .cube .front  { transform: translateZ(30px); }
+      .cube .back   { transform: rotateY(180deg) translateZ(30px); }
+      .cube .right  { transform: rotateY(90deg) translateZ(30px); }
+      .cube .left   { transform: rotateY(-90deg) translateZ(30px); }
+      .cube .top    { transform: rotateX(90deg) translateZ(30px); }
+      .cube .bottom { transform: rotateX(-90deg) translateZ(30px); }
+
+      h2 {
+        font-size: 16px;
+        margin-top: 25px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      h2 {
+        font-size: 14px;
+        margin-top: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cube">
+    <div class="front"></div>
+    <div class="back"></div>
+    <div class="right"></div>
+    <div class="left"></div>
+    <div class="top"></div>
+    <div class="bottom"></div>
+  </div>
+  <h2>Launching Quiz Portal...</h2>
+
+  <script>
+    setTimeout(() => {
+      window.location.href = "/teacher-login";
+    }, 4500);
+  </script>
+
+</body>
+</html>

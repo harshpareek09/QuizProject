@@ -14,6 +14,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const full_name = document.getElementById("studentName").value.trim();
     const course = document.getElementById("course").value.trim();
 
+    const pathParts = window.location.pathname.split('/');
+    const quiz_id = pathParts[pathParts.length - 1];
+
     if (!email || !full_name || !course) {
       msg.textContent = "❗ All fields are required.";
       msg.style.color = "red";
@@ -23,11 +26,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const loginData = {
       email: email,
       full_name: full_name,
-      course: course
+      course: course,
+      quiz_id: quiz_id
     };
 
     try {
-      const response = await fetch("/student/login", {
+      const response = await fetch("/student/login-quiz", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(loginData)
@@ -37,11 +41,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (response.ok && result.status === "success") {
         msg.style.color = "lightgreen";
-        msg.textContent = "✅ Login successful! Redirecting...";
-        setTimeout(() => {
-          // Redirect to quiz page (you can customize quiz_id)
-          window.location.href = "/attempt_quiz.html?quiz_id=1";
-        }, 1500);
+
+        if (result.already_attempted && result.redirect_url) {
+          msg.textContent = "ℹ️ You have already attempted this quiz. Redirecting to result...";
+          setTimeout(() => {
+            window.location.href = result.redirect_url;
+          }, 1500);
+        } else {
+          msg.textContent = "✅ Login successful! Redirecting to quiz...";
+          setTimeout(() => {
+            window.location.href = `/student/start-quiz/${quiz_id}?email=${encodeURIComponent(email)}`;
+          }, 1500);
+        }
+
       } else {
         msg.style.color = "red";
         msg.textContent = `❌ ${result.message || "Invalid credentials"}`;

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz Result</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/responsive.css">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(120deg, #1e1e2f, #4a0d67);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    .result-container {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 10px 40px rgba(160, 68, 255, 0.4);
+      max-width: 600px;
+      width: 100%;
+      padding: 40px;
+      text-align: center;
+      position: relative;
+      animation: fadeIn 0.6s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    h2 {
+      font-size: 26px;
+      margin-bottom: 20px;
+      color: #f0e6ff;
+    }
+
+    .score {
+      font-size: 40px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #a044ff;
+    }
+
+    .cheating-status {
+      font-size: 16px;
+      margin: 12px 0;
+      color: #ff8585;
+    }
+
+    .success {
+      color: #5eff95;
+    }
+
+    .reason {
+      font-size: 15px;
+      color: #ddd;
+    }
+
+    .back-btn {
+      margin-top: 30px;
+      padding: 12px 24px;
+      border: none;
+      background: linear-gradient(to right, #6a00ff, #a044ff);
+      color: #fff;
+      font-weight: bold;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background: linear-gradient(to right, #a044ff, #6a00ff);
+    }
+
+    @media (max-width: 600px) {
+      .result-container {
+        padding: 30px 20px;
+      }
+
+      .score {
+        font-size: 32px;
+      }
+
+      h2 {
+        font-size: 22px;
+      }
+
+      .back-btn {
+        padding: 10px 18px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="result-container">
+    <h2>Quiz Result</h2>
+    <div class="score" id="score">--</div>
+    <div class="cheating-status" id="cheating">--</div>
+    <div class="reason" id="reason">--</div>
+    <button class="back-btn" onclick="goHome()">Return to Homepage</button>
+  </div>
+
+  <script>
+    const pathParts = window.location.pathname.split("/");
+    const quiz_id = pathParts[pathParts.length - 1];
+    const email = new URLSearchParams(window.location.search).get("email");
+
+    async function fetchResult() {
+      try {
+        const res = await fetch(`/student/result/${quiz_id}/${email}`);
+        const data = await res.json();
+
+        if (data.success) {
+          document.getElementById("score").textContent = `Score: ${data.score}`;
+          document.getElementById("cheating").textContent = data.cheating_detected
+            ? "⚠️ Cheating Detected"
+            : "✅ No Cheating Detected";
+          document.getElementById("cheating").classList.toggle("success", !data.cheating_detected);
+          document.getElementById("reason").textContent = data.reason || "No cheating";
+        } else {
+          document.querySelector(".result-container").innerHTML = `<p style='color:red;'>${data.message}</p>`;
+        }
+
+      } catch (err) {
+        console.error("❌ Error fetching result:", err);
+        document.querySelector(".result-container").innerHTML = `<p style='color:red;'>⚠️ Could not load result.</p>`;
+      }
+    }
+
+    function goHome() {
+      window.location.href = "/";
+    }
+
+    fetchResult();
+  </script>
+</body>
+</html>

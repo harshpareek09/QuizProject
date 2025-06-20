@@ -6,6 +6,8 @@
   <title>Teacher Login</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/responsive.css">
+
   <style>
     * {
       margin: 0;
@@ -34,6 +36,7 @@
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
       color: #fff;
       text-align: center;
+      animation: fadeIn 0.4s ease;
     }
 
     .login-card .profile-pic {
@@ -84,6 +87,15 @@
       font-size: 16px;
     }
 
+    #message {
+      color: #ff9b9b;
+      font-size: 14px;
+      text-align: center;
+      margin-top: -10px;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+
     .login-button {
       width: 100%;
       padding: 13px;
@@ -110,6 +122,11 @@
         font-size: 20px;
       }
     }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
@@ -134,14 +151,13 @@
       <i class="fas fa-lock"></i>
       <input type="password" id="password" placeholder="Password">
     </div>
-    <div id="message" style="margin-bottom: 15px; font-weight: bold;"></div>
 
-    <button class="login-button " id="teacherloginbtn">LOGIN</button>
+    <div id="message"></div>
+
+    <button class="login-button" id="teacherloginbtn">LOGIN</button>
   </div>
- <script src="/static/js/login_teacher.js"></script>
 
-
-
+  <script src="/static/js/login_teacher.js"></script>
 
 </body>
 </html>

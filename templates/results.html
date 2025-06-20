@@ -6,6 +6,8 @@
   <title>Quiz Results</title>
   <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="/static/css/responsive.css">
+
   <style>
     :root {
       --primary: #4b0f68;
@@ -15,13 +17,20 @@
       --highlight: #b87de2;
       --border: #d2b6e3;
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Raleway', sans-serif;
       background: linear-gradient(135deg, #f4f0f8, #ebdff3);
       color: var(--text);
       min-height: 100vh;
     }
+
     header {
       position: sticky;
       top: 0;
@@ -35,8 +44,15 @@
       backdrop-filter: blur(10px);
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       z-index: 1000;
+      flex-wrap: wrap;
     }
-    header h1 { font-size: 24px; font-weight: 700; }
+
+    header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      flex: 1 1 auto;
+    }
+
     .back-btn {
       background-color: white;
       color: var(--primary);
@@ -46,11 +62,14 @@
       font-weight: bold;
       cursor: pointer;
       transition: all 0.3s ease;
+      margin-top: 10px;
     }
+
     .back-btn:hover {
       background-color: #f0e4f9;
       transform: translateY(-2px);
     }
+
     .container {
       padding: 40px;
     }
@@ -77,14 +96,16 @@
       color: #666;
       margin-top: 60px;
     }
+
     .results-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 24px;
       margin-top: 30px;
       opacity: 0;
       animation: fadeInGrid 0.6s ease-out forwards 0.3s;
     }
+
     .result-card {
       background: var(--card-bg);
       border-radius: 14px;
@@ -95,27 +116,33 @@
       opacity: 0;
       animation: slideIn 0.6s ease forwards;
     }
-    .result-card:nth-child(odd)   { animation-delay: 0.3s; }
-    .result-card:nth-child(even)  { animation-delay: 0.5s; }
+
+    .result-card:nth-child(odd) { animation-delay: 0.3s; }
+    .result-card:nth-child(even) { animation-delay: 0.5s; }
+
     .result-card h3 {
       color: var(--primary);
       margin-bottom: 8px;
       font-size: 18px;
       font-weight: bold;
     }
+
     .result-card p {
       margin: 5px 0;
       font-size: 14px;
     }
+
     .highlight {
       font-weight: 600;
       color: var(--highlight);
     }
+
     .pdf-btn {
       display: none;
       justify-content: center;
       margin-top: 30px;
     }
+
     .pdf-btn button {
       background-color: var(--primary);
       color: white;
@@ -128,20 +155,40 @@
       transition: background-color 0.3s ease, transform 0.3s ease;
       box-shadow: 0 0 10px rgba(75,15,104,0.3);
     }
+
     .pdf-btn button:hover {
       background-color: #370c4e;
       transform: scale(1.05);
     }
+
     @keyframes slideIn {
       from { opacity: 0; transform: translateY(30px); }
       to   { opacity: 1; transform: translateY(0); }
     }
+
     @keyframes fadeInGrid {
       from { opacity: 0; }
       to   { opacity: 1; }
     }
+
     @media (max-width: 600px) {
-      header h1 { font-size: 20px; }
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      header h1 {
+        font-size: 20px;
+      }
+
+      .back-btn {
+        width: 100%;
+      }
+
+      .container {
+        padding: 20px;
+      }
     }
   </style>
 </head>
@@ -213,7 +260,6 @@
       window.location.href = `/teacher/export/${quizId}`;
     }
 
-    // 🔍 Search logic
     document.getElementById("searchInput").addEventListener("input", function () {
       const filter = this.value.toLowerCase();
       const cards = document.querySelectorAll(".result-card");

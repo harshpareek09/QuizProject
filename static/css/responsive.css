@@ -1,0 +1,116 @@
+/* Global Responsive CSS */
+
+/* ========== Common Container Adjustments ========== */
+.container,
+.quiz-container,
+.result-card,
+.card,
+.dashboard-container,
+.login-box {
+  width: 100%;
+  max-width: 850px;
+  margin: auto;
+  padding: 30px 20px;
+  box-sizing: border-box;
+}
+
+/* ========== Typography Scaling ========== */
+h1 {
+  font-size: 2rem;
+}
+h2 {
+  font-size: 1.6rem;
+}
+h3 {
+  font-size: 1.4rem;
+}
+h4 {
+  font-size: 1.2rem;
+}
+p,
+label,
+input,
+button,
+select {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* ========== Input & Button ========== */
+input,
+select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+button {
+  padding: 12px 20px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 25px;
+  border: none;
+}
+
+/* ========== Image ========== */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ========== Responsive Media Queries ========== */
+@media screen and (max-width: 768px) {
+  h1 {
+    font-size: 1.6rem;
+  }
+  h2 {
+    font-size: 1.4rem;
+  }
+  h3 {
+    font-size: 1.2rem;
+  }
+  .quiz-container,
+  .result-card,
+  .login-box,
+  .dashboard-container {
+    padding: 20px 15px;
+  }
+  button {
+    width: 100%;
+  }
+  .question-box {
+    padding: 15px;
+  }
+}
+
+/* Mobile small */
+@media screen and (max-width: 480px) {
+  body {
+    padding: 15px;
+  }
+  h1 {
+    font-size: 1.3rem;
+  }
+  h2 {
+    font-size: 1.2rem;
+  }
+  h3 {
+    font-size: 1rem;
+  }
+  input,
+  select {
+    font-size: 0.95rem;
+    padding: 8px;
+  }
+  button {
+    font-size: 0.95rem;
+    padding: 10px;
+  }
+  .quiz-illustration,
+  .side-image {
+    display: none;
+  }
+}

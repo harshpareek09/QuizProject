@@ -1,85 +1,86 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, render_template
 from db_config import get_db_connection
 
 student_bp = Blueprint('student', __name__)
 
-# STUDENT LOGIN
-@student_bp.route('/login', methods=['POST'])
-def student_login():
+# ✅ Shared Link → Student Login Page
+@student_bp.route('/attempt-quiz/<int:quiz_id>', methods=['GET'])
+def attempt_quiz(quiz_id):
+    return render_template('studentlogin.html', quiz_id=quiz_id)
+
+# ✅ Student Login + Redirect Handler
+@student_bp.route('/login-quiz', methods=['POST'])
+def login_quiz():
+    data = request.get_json()
+    email = data.get("email")
+    name = data.get("full_name")
+    course = data.get("course")
+    quiz_id = data.get("quiz_id")
+
+    if not all([email, name, course, quiz_id]):
+        return jsonify({"status": "error", "message": "Missing required fields"}), 400
+
     try:
-        data = request.get_json()
-        email = data.get('email')
-        full_name = data.get('full_name')
-        course = data.get('course')
-
-        # ✅ Step 1: Input Validation — All fields required
-        if not email or not full_name or not course:
-            return jsonify({
-                'status': 'error',
-                'message': 'All fields (email, full_name, course) are required.'
-            }), 400
-
-        # ✅ Step 2: DB Connection
         conn = get_db_connection()
-        cursor = conn.cursor()
+        cursor = conn.cursor(dictionary=True)
 
-        # ✅ Step 3: Verify student from database
-        query = "SELECT * FROM students WHERE email = %s AND full_name = %s AND course = %s"
-        cursor.execute(query, (email, full_name, course))
-        student = cursor.fetchone()
+        # Already attempted
+        cursor.execute("SELECT * FROM final_results WHERE student_email = %s AND quiz_id = %s", (email, quiz_id))
+        result = cursor.fetchone()
+        if result:
+            return jsonify({
+                "status": "success",
+                "already_attempted": True,
+                "redirect_url": f"/student/result/{quiz_id}?email={email}"
+            }), 200
 
-        # ✅ Step 4: Send appropriate response
-        if student:
-            return jsonify({'status': 'success', 'message': 'Login successful'})
-        else:
-            return jsonify({'status': 'error', 'message': 'Invalid credentials'}), 401
+        # New student? Add
+        cursor.execute("SELECT * FROM students WHERE email = %s", (email,))
+        if not cursor.fetchone():
+            cursor.execute("INSERT INTO students (email, name, course) VALUES (%s, %s, %s)", (email, name, course))
+            conn.commit()
+
+        return jsonify({"status": "success"}), 200
 
     except Exception as e:
-        # ✅ Step 5: Handle unexpected server error
-        return jsonify({'status': 'error', 'message': f'Error: {str(e)}'}), 500
+        print("❌ Error:", e)
+        return jsonify({"status": "error", "message": "Internal server error"}), 500
 
     finally:
-        # ✅ Step 6: Close DB connection
-        if 'cursor' in locals(): cursor.close()
-        if 'conn' in locals(): conn.close()
+        cursor.close()
+        conn.close()
 
+# ✅ Render Start Quiz Page
+@student_bp.route('/start-quiz/<int:quiz_id>', methods=['GET'])
+def start_quiz(quiz_id):
+    return render_template('start_quiz.html', quiz_id=quiz_id)
 
-# ✅ GET route to fetch quiz questions (without correct_option)
+# ✅ Get Questions
 @student_bp.route('/quiz/<int:quiz_id>', methods=['GET'])
 def get_quiz_questions(quiz_id):
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-
-        # Fetch all questions of the given quiz, without correct_option
-        query = """
+        cursor.execute("""
             SELECT question_id, question_text, option1, option2, option3, option4
-            FROM questions
-            WHERE quiz_id = %s
-        """
-        cursor.execute(query, (quiz_id,))
+            FROM questions WHERE quiz_id = %s
+        """, (quiz_id,))
         questions = cursor.fetchall()
-
         cursor.close()
         conn.close()
-
         return jsonify({'success': True, 'questions': questions}), 200
-
     except Exception as e:
         return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500
 
-
-# Student submits response for a question
+# ✅ Save Response (FIXED)
 @student_bp.route('/submit-response', methods=['POST'])
 def submit_response():
     data = request.get_json()
-
     student_email = data.get('student_email')
     quiz_id = data.get('quiz_id')
     question_id = data.get('question_id')
     selected_option = data.get('selected_option')
 
-    # ✅ Validate input
     if not all([student_email, quiz_id, question_id, selected_option]):
         return jsonify({'success': False, 'message': 'Missing required fields'}), 400
 
@@ -87,25 +88,20 @@ def submit_response():
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        # 🔍 Get the correct answer for the question
         cursor.execute("SELECT correct_option FROM questions WHERE question_id = %s", (question_id,))
         correct_data = cursor.fetchone()
 
         if not correct_data:
             return jsonify({'success': False, 'message': 'Invalid question ID'}), 404
 
-        # ✅ Compare selected option with correct one
         correct_option = correct_data['correct_option']
-        is_correct = (selected_option == correct_option)
+        selected_option = int(selected_option)
+        is_correct = (selected_option == int(correct_option))
 
-        # 💾 Insert into responses table
-        insert_query = """
+        cursor.execute("""
             INSERT INTO responses (quiz_id, student_email, question_id, selected_option, is_correct)
             VALUES (%s, %s, %s, %s, %s)
-        """
-        cursor.execute(insert_query, (
-            quiz_id, student_email, question_id, selected_option, is_correct
-        ))
+        """, (quiz_id, student_email, question_id, selected_option, is_correct))
         conn.commit()
 
         cursor.close()
@@ -120,55 +116,38 @@ def submit_response():
     except Exception as e:
         return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500
 
-
-# 🚨 Route to report a cheating violation
+# ✅ Report Cheating
 @student_bp.route('/violation', methods=['POST'])
 def report_violation():
-    # Step 1: Get data from frontend
     data = request.get_json()
+    student_email = data.get('student_email')
+    quiz_id = data.get('quiz_id')
+    reason = data.get('reason')
 
-    student_email = data.get('student_email')  # Email of student
-    quiz_id = data.get('quiz_id')              # Quiz ID
-    reason = data.get('reason')                # Reason for violation (e.g., tab switch)
-
-    # Step 2: Check for missing fields
     if not all([student_email, quiz_id, reason]):
         return jsonify({'success': False, 'message': 'Missing required fields'}), 400
 
     try:
-        # Step 3: Connect to the database
         conn = get_db_connection()
         cursor = conn.cursor()
-
-        # Step 4: Insert the violation into the violations table
-        insert_query = """
+        cursor.execute("""
             INSERT INTO violations (student_email, quiz_id, reason)
             VALUES (%s, %s, %s)
-        """
-        cursor.execute(insert_query, (student_email, quiz_id, reason))
+        """, (student_email, quiz_id, reason))
         conn.commit()
-
-        # Step 5: Close connection
         cursor.close()
         conn.close()
-
-        # Step 6: Return success response
         return jsonify({'success': True, 'message': 'Violation recorded'}), 201
-
     except Exception as e:
-        # Step 7: Handle errors
         return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500
 
-
-# ✅ Route for final quiz submission and result calculation
+# ✅ Final Submit and Scoring
 @student_bp.route('/final-submit', methods=['POST'])
 def final_submit():
     data = request.get_json()
-
     student_email = data.get('student_email')
     quiz_id = data.get('quiz_id')
 
-    # Step 1: Validate input
     if not student_email or not quiz_id:
         return jsonify({'success': False, 'message': 'Missing required fields'}), 400
 
@@ -176,7 +155,6 @@ def final_submit():
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        # Step 2: Check if cheating was detected
         cursor.execute("SELECT reason FROM violations WHERE student_email = %s AND quiz_id = %s",
                        (student_email, quiz_id))
         violation = cursor.fetchone()
@@ -184,7 +162,6 @@ def final_submit():
         cheating_detected = violation is not None
         reason = violation['reason'] if violation else "No cheating detected"
 
-        # Step 3: Count correct answers from responses
         cursor.execute("""
             SELECT COUNT(*) AS correct_count 
             FROM responses 
@@ -192,23 +169,17 @@ def final_submit():
         """, (student_email, quiz_id))
         correct_count = cursor.fetchone()['correct_count']
 
-        # Step 4: Set total score = 0 if cheated, otherwise correct answers
         total_score = 0 if cheating_detected else correct_count
 
-        # Step 5: Insert final result into final_results table
-        insert_query = """
+        cursor.execute("""
             INSERT INTO final_results (student_email, quiz_id, total_score, cheating_detected, reason)
             VALUES (%s, %s, %s, %s, %s)
-        """
-        cursor.execute(insert_query, (
-            student_email, quiz_id, total_score, cheating_detected, reason
-        ))
+        """, (student_email, quiz_id, total_score, cheating_detected, reason))
 
         conn.commit()
         cursor.close()
         conn.close()
 
-        # Step 6: Return result response
         return jsonify({
             'success': True,
             'message': 'Result submitted successfully',
@@ -220,19 +191,16 @@ def final_submit():
     except Exception as e:
         return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500
 
-# ✅ Get student's final result for a specific quiz
+# ✅ Get Result
 @student_bp.route('/result/<int:quiz_id>/<student_email>', methods=['GET'])
 def get_student_result(quiz_id, student_email):
     try:
-        # Step 1: Connect to DB
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        # Step 2: Get quiz title for reference
         cursor.execute("SELECT title FROM quizzes WHERE quiz_id = %s", (quiz_id,))
         quiz = cursor.fetchone()
 
-        # Step 3: Fetch result from final_results
         cursor.execute("""
             SELECT total_score, cheating_detected, reason 
             FROM final_results 
@@ -243,11 +211,9 @@ def get_student_result(quiz_id, student_email):
         cursor.close()
         conn.close()
 
-        # Step 4: Check if result exists
         if not result:
             return jsonify({'success': False, 'message': 'Result not found'}), 404
 
-        # Step 5: Return structured result
         return jsonify({
             'success': True,
             'quiz_title': quiz['title'] if quiz else 'Unknown',
@@ -259,3 +225,11 @@ def get_student_result(quiz_id, student_email):
 
     except Exception as e:
         return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500
+
+# ✅ Serve result UI page (after final submit)
+@student_bp.route('/view-result/<int:quiz_id>', methods=['GET'])
+def view_result_page(quiz_id):
+    student_email = request.args.get("email")
+    if not student_email:
+        return "Invalid Request: Email required", 400
+    return render_template("student_result.html", quiz_id=quiz_id, student_email=student_email)

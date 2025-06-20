@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Quiz Created</title>
   <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/responsive.css">
+
   <style>
     :root {
       --primary: #4b0f68;
@@ -12,6 +14,12 @@
       --card: #fff;
       --highlight: #b87de2;
       --shadow: rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
@@ -31,6 +39,7 @@
       box-shadow: 0 10px 30px var(--shadow);
       text-align: center;
       max-width: 500px;
+      width: 100%;
       animation: fadeSlide 0.7s ease;
     }
 
@@ -56,7 +65,7 @@
       margin-bottom: 16px;
       user-select: all;
       color: var(--primary);
-      word-break: break-all;
+      word-break: break-word;
     }
 
     .buttons {
@@ -120,6 +129,30 @@
 
     .toast.show {
       opacity: 1;
+    }
+
+    @media screen and (max-width: 600px) {
+      .card {
+        padding: 25px 20px;
+      }
+
+      .card h1 {
+        font-size: 22px;
+      }
+
+      .card p {
+        font-size: 14px;
+      }
+
+      .btn {
+        font-size: 13px;
+        padding: 10px 16px;
+      }
+
+      .link-box {
+        font-size: 13px;
+        padding: 10px;
+      }
     }
   </style>
 </head>
